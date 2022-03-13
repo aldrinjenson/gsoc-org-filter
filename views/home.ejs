@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .flex {
+        display: flex;
+      }
+      .flex-wrap {
+        flex-wrap: wrap;
+      }
+      .container {
+        margin: 0 auto;
+        width: 95vw;
+        display: flex;
+        justify-content: center;
+      }
+      .card {
+        width: 25vw;
+        max-height: 70vh;
+        overflow: auto;
+        padding: 1em;
+        margin: 0.2em;
+        border: 1px solid #444;
+        background-color: #888;
+        text-align: center;
+        margin-bottom: 1em;
+      }
+      .hide {
+        display: none;
+      }
+      .favourite {
+        background-color: #ff4a4a;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 style="text-align: center"><%= orgs.length %> organizations left</h2>
+    <div class="flex flex-wrap container">
+      <% orgs.forEach((o, index)=>{ -%>
+      <div class="card">
+        <h3><%= index +1%>. <%= o.name %></h3>
+        <img
+          style="width: 50px; height: 50px"
+          src="<%=o.logo_url%>"
+          alt="logo"
+        />
+        <button
+          data-favourite="<%= o.favourite %>"
+          id="<%= o.slug%>"
+          class="favouriteBtn"
+        >
+          Add to favourite
+        </button>
+        <p>
+          <b>Categories:</b>
+          <%= o.categories.join(', ') %>
+        </p>
+        <p>
+          <b>Tagline:</b>
+          <%= o.tagline %>
+        </p>
+        <p>
+          <b>Skills:</b>
+          <%= o.tech_tags?.join(', ') %>
+        </p>
+
+        <a
+          href="https://summerofcode.withgoogle.com/programs/2022/organizations/<%= o.slug %> "
+          >Visit gsoc page</a
+        >
+        <p>
+          <b>Notes:</b>
+          <%= o.msg %>
+        </p>
+        <input
+          id="<%= o.slug%>"
+          name="msg"
+          type="text"
+          placeholder="Enter notes"
+        />
+        <button id="<%= o.slug%>" class="addMsgBtn">Add Note</button>
+        <button class="removeBtn" id="<%= o.slug%>">Remove from list</button>
+        <p>
+          <b>Description:</b>
+          <%= o.description %>
+        </p>
+      </div>
+      <% }); -%>
+    </div>
+  </body>
+  <script>
+    const addMsgBtns = document.querySelectorAll(".addMsgBtn");
+    const removeBtns = document.querySelectorAll(".removeBtn");
+    const favouriteBtns = document.querySelectorAll(".favouriteBtn");
+
+    favouriteBtns.forEach((btn) => {
+      console.log(btn.dataset);
+      if (btn.dataset.favourite == "true") {
+        console.log(btn.id);
+
+        btn.parentElement.classList.add("favourite");
+      }
+      btn.addEventListener("click", () => {
+        fetch("/favourite", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ slug: btn.id }),
+        })
+          .then(() => {
+            btn.parentElement.classList.add("favourite");
+          })
+          .catch((err) => console.log("Error: " + err));
+      });
+    });
+    removeBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        console.log(btn.id);
+        fetch("/remove", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ slug: btn.id }),
+        })
+          .then(() => {
+            btn.parentElement.classList.add("hide");
+          })
+          .catch((err) => console.log("Error: " + err));
+      });
+    });
+
+    addMsgBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        fetch("/addMsg", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            slug: btn.id,
+            msg: btn.previousElementSibling.value,
+          }),
+        })
+          .then(() => {
+            console.log("updated");
+          })
+          .catch((err) => console.log("Error: " + err));
+      });
+    });
+  </script>
+</html>
