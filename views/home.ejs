@@ -103,10 +103,8 @@
     const favouriteBtns = document.querySelectorAll(".favouriteBtn");
 
     favouriteBtns.forEach((btn) => {
-      console.log(btn.dataset);
       if (btn.dataset.favourite == "true") {
         console.log(btn.id);
-
         btn.parentElement.classList.add("favourite");
       }
       btn.addEventListener("click", () => {

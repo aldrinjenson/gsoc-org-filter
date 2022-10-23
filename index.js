@@ -7,15 +7,15 @@ let orgs = gsocOrgs;
 
 const shuffleArray = (array) => {
   // let curId = array.length;
-  const sorted = array.sort((a, b) => a.favourite && a.slug < b.slug);
-  // while (0 !== curId) {
-  //   let randId = Math.floor(Math.random() * curId);
-  //   curId -= 1;
-  //   let tmp = array[curId];
-  //   array[curId] = array[randId];
-  //   array[randId] = tmp;
-  // }
-  return sorted;
+  // const sorted = array.sort((a, b) => a.favourite && b.favourite);
+  // // while (0 !== curId) {
+  // //   let randId = Math.floor(Math.random() * curId);
+  // //   curId -= 1;
+  // //   let tmp = array[curId];
+  // //   array[curId] = array[randId];
+  // //   array[randId] = tmp;
+  // // }
+  return array;
 };
 
 app.set("view engine", "ejs");
@@ -37,12 +37,16 @@ app.post("/remove", (req, res) => {
 
 app.post("/favourite", (req, res) => {
   const { slug } = req.body;
-  const newOrgs = orgs.map((o) => {
+  console.log(slug);
+  let selected = {};
+  const newOrgs = orgs.filter((o) => {
     if (o.slug === slug) {
-      return { ...o, favourite: true };
+      selected = { ...o, favourite: !o.favourite };
+      return false;
     }
-    return o;
+    return true;
   });
+  newOrgs.unshift(selected);
   orgs = newOrgs;
   fs.writeFileSync("gsoc.json", JSON.stringify(newOrgs));
   res.send("ok");
